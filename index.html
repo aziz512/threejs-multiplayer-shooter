@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css">
+  <title>Multiplayer Shooter</title>
+</head>
+
+<body>
+  <script type="module" src="/src/main.ts"></script>
+  <div id="crosshairs">
+  </div>
+  <div class="modal-overlay">
+    <div id="welcome-popup" class="ui-screen">
+      <div class="play-button">
+        <button id="start-game-button">PLAY</button>
+      </div>
+      <div class="play-button">
+        <button id="join-game-menu-button">JOIN GAME</button>
+      </div>
+      <div>
+        <p class="author_info">
+          Made by Aziz Yokubjonov - 2022
+        </p>
+      </div>
+    </div>
+    <div id="game-created-popup" class="ui-screen">
+      <div>
+        <p class="command">
+          Game created! Waiting for a second player. Your friend can join the game using the following code:
+        </p>
+        <p id="game-code">
+          4534
+        </p>
+      </div>
+    </div>
+    <div id="join-game-popup" class="ui-screen">
+      <div>
+        <p class="command">
+          To join the game, enter the code provided by second player:
+        </p>
+        <div>
+          <input type="text" name="game-code" id="game-code-input" placeholder="game code">
+          <button id="join-game-button">Join</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="game-stats-overlay">
+    <div id="health-container">
+      +<span id="health">100</span>
+    </div>
+    <div id="stats">
+      <div>
+        You: <span class="score" id="myScore">0</span>
+      </div>
+      <div>
+        Them: <span class="score" id="opponentScore">0</span>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
