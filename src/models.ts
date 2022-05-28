@@ -1,4 +1,4 @@
-export const MODELS = {
+export const MODELS: any = {
     tent: {
         obj: "models/Tent_Poles_01.obj",
         mtl: "models/Tent_Poles_01.mtl",

@@ -4,7 +4,7 @@ import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Sky } from 'three/examples/jsm/objects/Sky';
-import { Group, Mesh } from "three";
+import { Group, Mesh, MeshStandardMaterial } from "three";
 import { MODELS as loadedModels } from './models';
 import { randFloat, randInt } from "three/src/math/MathUtils";
 
@@ -38,9 +38,9 @@ export const loadModels = (models, loadingManager) => {
                 const gltfLoader = new GLTFLoader(loadingManager);
                 gltfLoader.load(models[key].gltf, (obj) => {
                     processLoadedMesh(obj.scene);
-                    obj.scene.traverse((node) => {
+                    obj.scene.traverse((node: Mesh) => {
                         if (node.isMesh) {
-                            node.material.metalness = 0.7;
+                            (node.material as MeshStandardMaterial).metalness = 0.7;
                         }
                     });
                 });
@@ -70,9 +70,11 @@ interface BuildSceneParams {
             obj?: string;
             mlt?: string;
         }
-    }
+    };
+    targetSolidMeshes;
+    scene: THREE.Scene;
 }
-export const buildScene = ({ scene, targetSolidMeshes, renderer }: BuildSceneParams) => {
+export const buildScene = ({ scene, targetSolidMeshes }: BuildSceneParams) => {
     // store actionable meshes
     const meshes = {};
 
@@ -268,8 +270,7 @@ export const buildScene = ({ scene, targetSolidMeshes, renderer }: BuildScenePar
         mieCoefficient: 0.01,
         mieDirectionalG: 0.16,
         elevation: 2,
-        azimuth: 180,
-        exposure: renderer.toneMappingExposure
+        azimuth: 180
     };
 
     function guiChanged() {
@@ -286,8 +287,6 @@ export const buildScene = ({ scene, targetSolidMeshes, renderer }: BuildScenePar
         sun.setFromSphericalCoords(1, phi, theta);
 
         uniforms['sunPosition'].value.copy(sun);
-
-        renderer.toneMappingExposure = effectController.exposure;
     }
     guiChanged();
 

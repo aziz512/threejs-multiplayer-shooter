@@ -1,12 +1,13 @@
 import * as THREE from 'three';
+import { Box3, Group, Mesh, Object3D, Vector3 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 import { Animations, Character } from './Character';
-import { Box3, Group, Mesh, Object3D } from 'three';
 import { connect, ConnectionManager, Event } from './connection-manager';
-import { buildScene, loadModels } from './scene';
-import { MODELS } from './models';
-import { hideOverlay, Screen, showGameStats, switchToScreen } from './ui';
 import { IOController, setUpIOControllerListeners } from './keyDown';
+import { MODELS } from './models';
+import { buildScene, loadModels } from './scene';
+import './style.css';
+import { hideOverlay, Screen, showGameStats, switchToScreen } from './ui';
 
 let scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer,
     clock: THREE.Clock,
@@ -36,7 +37,10 @@ const PLAYER_CONFIG = {
 let connection: ConnectionManager;
 
 // Bullets array
-var bullets: ({ velocity: number; } & THREE.Mesh)[] = [];
+interface ExtendedBullet extends THREE.Mesh {
+    velocity: Vector3; alive: boolean;
+}
+const bullets: ExtendedBullet[] = [];
 let opponent: Character;
 let boundingMesh: Mesh;
 // meshes through which the player can't walk / fall
@@ -67,7 +71,7 @@ async function init() {
         console.log(item, loaded, total);
     };
     loadingManager.onLoad = async function () {
-        const specificMeshes = buildScene({ scene, loadedModels: MODELS, targetSolidMeshes: solidMeshes, renderer });
+        const specificMeshes = buildScene({ scene, loadedModels: MODELS, targetSolidMeshes: solidMeshes });
         weaponModel = specificMeshes['playerweapon'];
 
         opponent = new Character();
@@ -86,7 +90,7 @@ async function init() {
         document.querySelector('#join-game-menu-button')?.addEventListener('click', () => {
             switchToScreen(Screen.JoinGame);
             document.querySelector('#join-game-button')?.addEventListener('click', () => {
-                const enteredGameId = document.querySelector('#game-code-input').value;
+                const enteredGameId = (document.querySelector('#game-code-input') as HTMLInputElement).value;
                 if (enteredGameId) {
                     connection.sendMessage(Event.Join, {
                         gameId: enteredGameId
@@ -147,7 +151,7 @@ async function init() {
         showGameStats();
         resetGame();
     });
-    connection.on(Event.ShotFired, (payload) => {
+    connection.on(Event.ShotFired, () => {
         const listener = camera.children.find(c => c.type === (new THREE.AudioListener()).type);
         opponent.playShootingSound(listener);
     });
@@ -156,7 +160,7 @@ async function init() {
     });
     connection.on(Event.ShotLanded, ({ damage }) => {
         PLAYER_CONFIG.health = Math.max(PLAYER_CONFIG.health - damage, 0);
-        document.querySelector('#health').innerHTML = PLAYER_CONFIG.health;
+        document.querySelector('#health').innerHTML = PLAYER_CONFIG.health.toString();
 
         if (PLAYER_CONFIG.health === 0) {
             opponentScore += 1;
@@ -186,7 +190,7 @@ function animate() {
 
     var delta = clock.getDelta();
     handlePlayerMovement(delta);
-    handleShooting(delta);
+    handleShooting();
 
     // position the gun in front of the camera
     weaponModel.position.set(
@@ -301,7 +305,7 @@ const undoCameraMovementIfCollision = (oldPosition) => {
 
 window.onload = init;
 
-function handleShooting(delta: number) {
+function handleShooting() {
     // go through bullets array and update position
     // remove bullets when appropriate
     for (var index = 0; index < bullets.length; index += 1) {
@@ -319,10 +323,10 @@ function handleShooting(delta: number) {
         io_controller['left_mouse'] = false;
 
         // creates a bullet as a Mesh object
-        const bullet = new THREE.Mesh(
+        const bullet = (new THREE.Mesh(
             new THREE.SphereGeometry(0.05, 2, 6),
             new THREE.MeshBasicMaterial({ color: 0xAA5802 })
-        );
+        ) as unknown as ExtendedBullet);
         // position the bullet to come from the player's weapon
         bullet.position.set(
             weaponModel.position.x,
@@ -385,7 +389,7 @@ function handleShooting(delta: number) {
         PLAYER_CONFIG.canShoot = 10;
 
         // play shooting sound
-        const listener = camera.children.find(c => c.type === (new THREE.AudioListener()).type);
+        const listener = camera.children.find(c => c.type === (new THREE.AudioListener()).type) as THREE.AudioListener;
         playShootingSound(weaponModel, shotAudioBuffer, listener);
 
         // send other player a message that shot has been fired (need to play shooting sound on their computer)
@@ -420,8 +424,8 @@ export function resetGame() {
 
     PLAYER_CONFIG.health = 100;
     opponent.health = 100;
-    document.querySelector('#health').innerHTML = PLAYER_CONFIG.health;
+    document.querySelector('#health').innerHTML = PLAYER_CONFIG.health.toString();
 
-    document.querySelector('#myScore').innerHTML = myScore;
-    document.querySelector('#opponentScore').innerHTML = opponentScore;
+    document.querySelector('#myScore').innerHTML = myScore.toString();
+    document.querySelector('#opponentScore').innerHTML = opponentScore.toString();
 }

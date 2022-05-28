@@ -1,6 +1,6 @@
 export const hideAllScreens = () => {
     document.querySelectorAll('.ui-screen').forEach(screen => {
-        screen.style.display = 'none';
+        (screen as HTMLDivElement).style.display = 'none';
     });
 };
 
@@ -11,9 +11,9 @@ export enum Screen {
 }
 
 export const switchToScreen = (screen: Screen) => {
-    document.querySelector('.modal-overlay').style.visibility = 'visible';
+    (document.querySelector('.modal-overlay') as HTMLDivElement).style.visibility = 'visible';
     hideAllScreens();
-    document.querySelector('#' + screen).style.display = 'block';
+    (document.querySelector('#' + screen) as HTMLDivElement).style.display = 'block';
 };
 
 export const hideOverlay = () => {

@@ -26,7 +26,6 @@ export class Character {
     private currentAnimation: AnimationAction;
 
     private gun: THREE.Mesh;
-    private box: Mesh;
     private shootingSoundBuffer: AudioBuffer;
     gruntSoundBuffers: AudioBuffer[] = [];
 
@@ -48,12 +47,11 @@ export class Character {
         this.playAnimation(this.animationActions[Animations.Default]);
 
         this.model = model;
-        window.model = model;
         scene.add(model);
 
         this.gun = gunObject;
         gunObject.traverse((obj) => {
-            if (obj.isMesh) {
+            if ((obj as Mesh).isMesh) {
                 obj.castShadow = true;
             }
         });
@@ -75,7 +73,7 @@ export class Character {
     updateGunPosition() {
         let handPosition = new THREE.Vector3();
         this.model.traverse((obj) => {
-            if (obj.isMesh) {
+            if ((obj as Mesh).isMesh) {
                 obj.castShadow = true;
                 obj.receiveShadow = true;
             }
@@ -120,7 +118,7 @@ export class Character {
     }
 
     loadAnimations() {
-        return Promise.all(Object.values(Animations).map(async (animation, index) => {
+        return Promise.all(Object.values(Animations).map(async (animation) => {
             const fbxLoader = new FBXLoader();
             const animationModel = await fbxLoader.loadAsync(`models/${animation}.fbx`);
 
