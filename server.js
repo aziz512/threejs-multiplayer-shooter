@@ -1,13 +1,25 @@
-var WebSocketServer = require('ws').Server;
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 8080;
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static('dist/'));
+    app.get('*', function (req, res) {
+        res.sendFile('index.html', { root: 'dist/' });
+    });
+}
+const server = app.listen(port, () => {
+    console.log(`Listening at http://localhost:${port}`)
+})
 
-var wss = new WebSocketServer({ port: 8080 });
+
+const WebSocketServer = require('ws').Server;
+const wss = new WebSocketServer({ server });
 
 const games = {
     'someId': {
         players: {}
     }
 };
-
 wss.on('connection', function (connection) {
     const playerId = Math.round(Date.now());
     connection.playerId = playerId;

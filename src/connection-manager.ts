@@ -19,7 +19,7 @@ export interface ConnectionManager extends WebSocket {
 
 export const connect = () => {
     return new Promise<ConnectionManager>(res => {
-        const conn = new WebSocket('ws://localhost:8080');
+        const conn = new WebSocket(window.location.origin.replace(/^http/, 'ws'));
         conn.onopen = function () {
             const listeners: Listener[] = [];
             conn.onmessage = (msg) => {
